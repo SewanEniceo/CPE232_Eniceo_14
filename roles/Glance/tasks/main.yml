@@ -1,0 +1,102 @@
+---
+
+  - name: create admiin-openrc
+    tags: glance, ubuntu, file
+    copy:
+      src: admin-openrc.sh
+      dest: /home/sewan
+      owner: root
+      group: root
+      mode: 0744
+
+  - name: install glance
+    apt:
+      name: glance
+      state: present
+    when: ansible_distribution == "Ubuntu"
+
+  - name: edit the conf file for glance
+    tags: glance, ubuntu
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      regexp: "connection = sqli:////var/lib/glance/glance.sqlite"
+      line: "connection = mysql+pymysql+://glance:kimchi31@controller/glance"
+      state: present
+
+  - name: edit conf file for authtoken
+    tags: glance, ubuntu
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      regexp: "www_authenticate_uri = <None>"
+      line: "www_authenticate_uri = http://controller:5000"
+      state: present
+
+  - name: edit conf file for authtoken(1)
+    tags: glance, ubuntu
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      regexp: "memcached_servers = <None>"
+      line: "memcached_servers = controller:11211"
+      state: present
+
+  - name: edit conf file for authtoken(2)
+    tags: glance, ubuntu
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      regexp: "auth_type = <None>"
+      line: "auth_type = password"
+
+  - name: add conf file for authtoken
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "auth_url = http://controller:5000"
+      state: present
+
+
+  - name: add conf file for authtoken(1)
+    lineinfile:
+      dest: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "project_domain_name = Default"
+      state: present
+
+  - name: add conf file for authtoken(2)
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "user_domain_name = Default"
+      state: present
+
+  - name: add conf file for authtoken(3)
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "project_name = service"
+      state: present
+
+  - name: add conf file for authtoken(4)
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "username =glance"
+      state: present
+
+  - name: add conf file for authtoken(5)
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "password = kimchi31"
+      state: present
+
+  - name: add conf file for authtoken(1)
+    lineinfile:
+      path: /etc/glance/glance-api.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "project_domain_name = Default"
+      state: present
+
+  - name: glance service restart
+    service:
+      name: glance-api
+      state: restarted

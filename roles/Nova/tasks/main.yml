@@ -1,0 +1,277 @@
+---
+
+  - name: install nova
+    apt:
+      name: nova-compute
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: edit file for nova conf
+    tags: nova, edit, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "transport_url = rabbit://"
+      line: "transport_url == rabbit://openstack:kimchi31@controller"
+      state: present
+
+  - name: line verification for nova conf auth_strategy
+    lineinfile:
+      path: /etc/nova/nova.conf
+      line: "auth_strategy = keystone"
+      state: present
+    check_mode: yes
+
+  - name: edit conf file for authtoken
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "www_authenticate_uri = <None>"
+      line: "www_authenticate_uri = http://controller:5000"
+      state: present
+
+  - name: edit conf file for authtoken(1)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "memcached_servers = <None>"
+      line: "memcached_servers = controller:11211"
+      state: present
+
+  - name: edit conf file for authtoken(2)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "auth_type = <None>"
+      line: "auth_type = password"
+      state: present
+
+  - name: add conf file for authtoken
+    lineinfile:
+      path: /etc/nova/nova.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "auth_url = http://controller:5000"
+      state: present
+
+
+  - name: add conf file for authtoken(1)
+    lineinfile:
+      dest: /etc/nova/nova.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "project_domain_name = Default"
+      state: present
+
+  - name: add conf file for authtoken(2)
+    lineinfile:
+      path: /etc/nova/nova.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "user_domain_name = Default"
+      state: present
+
+  - name: add conf file for authtoken(3)
+    lineinfile:
+      path: /etc/nova/nova.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "project_name = service"
+      state: present
+
+  - name: add conf file for authtoken(4)
+    lineinfile:
+      path: /etc/nova/nova.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "username =glance"
+      state: present
+
+  - name: add conf file for authtoken(5)
+    lineinfile:
+      path: /etc/nova/nova.conf
+      insertafter: '^\[keystone_authtoken\]'
+      line: "password = kimchi31"
+      state: present
+
+  - name: edit conf file for authtoken(2)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "my_ip = <host_ipv4>"
+      line: "my_ip = 192.168.56.113"
+      state: present
+
+  - name: edit conf file for neutron section
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "auth_url = <None>"
+      line: "auth_url = http://controller:5000"
+      state: present
+
+  - name: edit conf file for neutron section(2)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "auth_type = <None>"
+      line: "auth_type = password"
+      state: present
+
+  - name: edit conf file for neutron section(3)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "project_domain_name = <None>"
+      line: "project_domain_name = default"
+      state: present
+
+  - name: edit conf file for neutron section(4)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "user_domain_name = <None>"
+      line: "user_domain_name = default"
+      state: present
+
+  - name: edit conf file for neutron section(5)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "region_name = <None>"
+      line: "region_name = RegionOne"
+      state: present
+
+  - name: edit conf file for neutron section(6)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "project__name = <None>"
+      line: "project_name = service"
+      state: present
+
+  - name: edit conf file for neutron section(7)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "username = <None>"
+      line: "username = neutron"
+      state: present
+
+  - name: edit conf file for neutron section
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "password = <None>"
+      line: "password = kimchi31"
+      state: present
+
+  - name: line verification for nova conf vnc
+    lineinfile:
+      path: /etc/nova/nova.conf
+      line: "enabled = true"
+      state: present
+    check_mode: yes
+
+  - name: edit conf file for vnc section
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "server_listen = 127.0.0.1"
+      line: "server_listen = 0.0.0.0"
+      state: present
+
+  - name: edit conf file for vnc section(1)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "server_proxyclient_address = 127.0.0.1"
+      line: "server_proxyclient_address = $my_ip"
+      state: present
+
+  - name: edit conf file for vnc section(2)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "novncproxy_base_url = http://127.0.0.1:6080/vnc_auto.html"
+      line: "novncproxy_base_url = http://controller:6080/vnc_auto.html"
+      state: present
+
+  - name: edit conf file for glance section
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "api_servers = <None>"
+      line: "api_servers = http://controller:9292"
+      state: present
+
+  - name: edit conf file for oslo_concurrency section
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "lock_path = <None>"
+      line: "lock_path = /var/lib/nova/tmp"
+      state: present
+
+  - name: edit conf file for placement section
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "auth_url = <None>"
+      line: "auth_url = http://controller:5000"
+      state: present
+
+  - name: edit conf file for placement section(2)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "auth_type = <None>"
+      line: "auth_type = password"
+      state: present
+
+  - name: edit conf file for placement section(3)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "project_domain_name = <None>"
+      line: "project_domain_name = Default"
+      state: present
+
+  - name: edit conf file for placement section(4)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "user_domain_name = <None>"
+      line: "user_domain_name = Default"
+      state: present
+
+  - name: edit conf file for neutron section(5)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "region_name = <None>"
+      line: "region_name = RegionOne"
+      state: present
+
+  - name: edit conf file for placement section(6)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "project__name = <None>"
+      line: "project_name = service"
+      state: present
+
+  - name: edit conf file for placement section(7)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "username = <None>"
+      line: "username = placement"
+      state: present
+
+  - name: edit conf file for placement section(8)
+    tags: nova, ubuntu
+    lineinfile:
+      path: /etc/nova/nova.conf
+      regexp: "password = <None>"
+      line: "password = kimchi31"
+      state: present
+
+  - name: nova service restart
+    service:
+      name: nova-compute
+      state: restarted
